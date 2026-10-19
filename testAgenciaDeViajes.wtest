@@ -1,0 +1,46 @@
+import beneficiosEspeciales.*
+import coordinadores.*
+import agenciaDeViajes.*
+describe "Calcular el valor final de un pack" {
+  test "Un pack nacional sin beneficios vigentes devuelve el mismo precio base" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 2, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    const pack1 = new PacksNacionales(diasDeDuracion = 3,precioBase = 100,coordinadorACargo = coordinador1, provinciaDestino = "Mendoza")
+    assert.equals(100, pack1.valorFinal())
+  }
+  test "Un pack nacional con 2 beneficios vigentes suma correctamente sus costos al precio base" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 2, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    const pack1 = new PacksNacionales(diasDeDuracion = 3,precioBase = 100,coordinadorACargo = coordinador1, provinciaDestino = "Mendoza")
+    const beneficiosOpcionales1 = new BeneficiosOpcionales(tipo = "Traslados privados", costo = 10, estaVigente = true)
+    const beneficiosOpcionales2 = new BeneficiosOpcionales(tipo = "Acceso a salas VIP", costo = 15, estaVigente = true)
+    pack1.agregarBeneficioEspecial(beneficiosOpcionales1)
+    pack1.agregarBeneficioEspecial(beneficiosOpcionales2)
+    assert.equals(125, pack1.valorFinal())
+  }
+  test "Un pack internacional sin beneficios vigentes calcula correctamente el total con el 20% de recargo" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 2, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    const pack2 = new PacksInternacionales(diasDeDuracion = 3,precioBase = 100,coordinadorACargo = coordinador1, paisDestino = "Islandia", cantidadDeEscalas = 3, esLugarDeInteres = true)
+    assert.equals(120, pack2.valorFinal())
+  }
+  test "Un guía motivado con 21 viajes realizados es considerado altamente calificado" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 21, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    assert.that(coordinador1.esAltamenteCalificado())
+  }
+  test "Un asistente logistico con menos de 3 años de experiencia no es calificado, aunque tenga muchos viajes" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 90, añosDeExperiencia = 2, rol = asistenteLogistico ,estaMotivado = true)
+    assert.notThat(coordinador1.esAltamenteCalificado())
+  }
+  test "Un acompañante con cualquier cantidad de viajes es siempre calificado si supera los 20" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 21, añosDeExperiencia = 1, rol = acompañante ,estaMotivado = false)
+    assert.that(coordinador1.esAltamenteCalificado())
+  }
+  test "Tiene mas de 10 dias de duracion y su cordinador es altamente calificado, por lo tanto es pack nacional premium" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 21, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    const pack1 = new PacksNacionales(diasDeDuracion = 11,precioBase = 100,coordinadorACargo = coordinador1, provinciaDestino = "Mendoza")
+    assert.that(pack1.esPremium())
+  }
+  test "Es un lugar de interes, tiene mas de 20 dias de duración, no tiene ninguna escala, por lo tanto es pack internacional premium" {
+    const coordinador1 = new Coordinador(cantidadDeViajes = 21, añosDeExperiencia = 3, rol = guia,estaMotivado = true)
+    const pack2 = new PacksInternacionales(diasDeDuracion = 22,precioBase = 100,coordinadorACargo = coordinador1, paisDestino = "Islandia", cantidadDeEscalas = 0, esLugarDeInteres = true)
+    assert.that(pack2.esPremium())
+  }
+}
